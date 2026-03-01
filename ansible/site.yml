@@ -1,0 +1,91 @@
+---
+- name: Preparar Docker en todos los nodos
+  hosts: all
+  become: yes
+  roles:
+    - common
+
+- name: Configurar el Balanceador de Carga
+  hosts: proxy
+  become: yes
+  roles:
+    - haproxy
+
+# --- 1. CAPA DE DATOS ---
+- name: Desplegar Base de Datos y Colas
+  hosts: data
+  become: yes
+  tasks:
+    - name: Levantar Redis
+      include_role:
+        name: app_deploy
+      vars:
+        app_name: "redis-queue"
+        app_image: "redis:alpine"
+        app_port_mapping: "6379:6379"
+
+# --- 2. CAPA DE LÓGICA (BACKEND) ---
+- name: Desplegar Microservicios de Lógica
+  hosts: backend_auth_users
+  become: yes
+  tasks:
+    - name: Levantar Auth API
+      include_role:
+        name: app_deploy
+      vars:
+        app_name: "auth-api"
+        app_image: "ghcr.io/tu-usuario/auth-api:latest"
+        app_port_mapping: "8000:8000"
+
+    - name: Levantar Users API
+      include_role:
+        name: app_deploy
+      vars:
+        app_name: "users-api"
+        app_image: "ghcr.io/tu-usuario/users-api:latest"
+        app_port_mapping: "8083:8083"
+
+- name: Desplegar TODOs y Worker
+  hosts: backend_todos
+  become: yes
+  tasks:
+    - name: Levantar TODOs API
+      include_role:
+        name: app_deploy
+      vars:
+        app_name: "todos-api"
+        app_image: "ghcr.io/tu-usuario/todos-api:latest"
+        app_port_mapping: "8082:8082"
+        app_env_vars:
+          # Aquí curamos la ceguera: le damos la IP de la VM Data
+          REDIS_HOST: "192.168.56.14" 
+          REDIS_PORT: "6379"
+
+    - name: Levantar Log Processor
+      include_role:
+        name: app_deploy
+      vars:
+        app_name: "log-processor"
+        app_image: "ghcr.io/tu-usuario/log-message-processor:latest"
+        # Este no necesita mapeo de puertos, solo consume
+        app_port_mapping: "" 
+        app_env_vars:
+          REDIS_HOST: "192.168.56.14"
+          REDIS_PORT: "6379"
+
+# --- 3. CAPA DE FRONTEND ---
+- name: Desplegar Interfaz de Usuario
+  hosts: frontend
+  become: yes
+  tasks:
+    - name: Levantar Frontend Vue
+      include_role:
+        name: app_deploy
+      vars:
+        app_name: "frontend-app"
+        app_image: "ghcr.io/tu-usuario/frontend:latest"
+        app_port_mapping: "8080:8080"
+        app_env_vars:
+          # Un Frontend real en el navegador debe apuntar a la IP pública del Proxy, no a IPs internas
+          AUTH_API_ADDRESS: "http://192.168.56.10/api/auth"
+          TODOS_API_ADDRESS: "http://192.168.56.10/api/todos"

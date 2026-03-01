@@ -1,0 +1,16 @@
+---
+- name: "Hacer pull de la imagen: {{ app_image }}"
+  docker_image:
+    name: "{{ app_image }}"
+    source: pull
+    # force_source: yes  # Descomenta esto en el futuro para forzar la descarga de la última versión de 'latest'
+
+- name: "Desplegar contenedor: {{ app_name }}"
+  docker_container:
+    name: "{{ app_name }}"
+    image: "{{ app_image }}"
+    state: started
+    restart_policy: always
+    ports:
+      - "{{ app_port_mapping }}"
+    env: "{{ app_env_vars | default({}) }}"

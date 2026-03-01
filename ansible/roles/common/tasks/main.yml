@@ -1,0 +1,46 @@
+---
+- name: Actualizar caché de apt e instalar dependencias
+  apt:
+    update_cache: yes
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+      - python3-pip
+    state: present
+
+- name: Añadir clave GPG oficial de Docker
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Añadir repositorio de Docker
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu jammy stable
+    state: present
+
+- name: Instalar Docker Engine
+  apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+    state: present
+    update_cache: yes
+
+- name: Asegurar que Docker esté iniciado y habilitado
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Añadir el usuario vagrant al grupo docker
+  user:
+    name: vagrant
+    groups: docker
+    append: yes
+
+- name: Instalar módulo de Docker para Python (necesario para Ansible)
+  pip:
+    name: docker
