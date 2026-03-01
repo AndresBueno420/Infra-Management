@@ -3,7 +3,7 @@
   docker_image:
     name: "{{ app_image }}"
     source: pull
-    # force_source: yes  # Descomenta esto en el futuro para forzar la descarga de la última versión de 'latest'
+    # force_source: yes
 
 - name: "Desplegar contenedor: {{ app_name }}"
   docker_container:
@@ -11,6 +11,6 @@
     image: "{{ app_image }}"
     state: started
     restart_policy: always
-    ports:
-      - "{{ app_port_mapping }}"
+    # Si la variable está vacía o no existe, Ansible ignora por completo este parámetro
+    ports: "{{ [app_port_mapping] if app_port_mapping | default('') != '' else omit }}"
     env: "{{ app_env_vars | default({}) }}"

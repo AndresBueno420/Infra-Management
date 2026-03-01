@@ -16,37 +16,37 @@ frontend http_front
     bind *:80
     stats uri /haproxy?stats
 
-    # --- ACLs (Reglas de ruteo por path) ---
+    # Reglas de inspección de tráfico
     acl is_auth_api path_beg /api/auth
     acl is_users_api path_beg /api/users
     acl is_todos_api path_beg /api/todos
     
-    # --- Redirecciones ---
+    # Intercepción dura: HAProxy manda el tráfico directo a las APIs
     use_backend auth_api_cluster if is_auth_api
     use_backend users_api_cluster if is_users_api
     use_backend todos_api_cluster if is_todos_api
     
-    # Todo lo que no sea /api/* va al Frontend (Vue/Node)
+    # Si no dice /api, es la interfaz gráfica
     default_backend frontend_cluster
 
-# --- Backends (Destinos Reales) ---
+# --- Destinos re-mapeados a los 2 Nodos ---
 
 backend frontend_cluster
     balance roundrobin
-    # El Frontend (Node) expone el puerto 8080
-    server frontend_vm 192.168.56.11:8080 check
+    # Vive en esta misma VM (node-apps)
+    server frontend_vm 192.168.56.10:8080 check
 
 backend auth_api_cluster
     balance roundrobin
-    # El Auth API (Go) expone el puerto 8000
-    server auth_vm 192.168.56.12:8000 check
-
-backend users_api_cluster
-    balance roundrobin
-    # El Users API (Java) expone el puerto 8083
-    server users_vm 192.168.56.12:8083 check
+    # Vive en esta misma VM (node-apps)
+    server auth_vm 192.168.56.10:8000 check
 
 backend todos_api_cluster
     balance roundrobin
-    # El TODOs API (Node) expone el puerto 8082
-    server todos_vm 192.168.56.13:8082 check
+    # Vive en esta misma VM (node-apps)
+    server todos_vm 192.168.56.10:8082 check
+
+backend users_api_cluster
+    balance roundrobin
+    # Vive en el nodo remoto (node-data)
+    server users_vm 192.168.56.11:8083 check
