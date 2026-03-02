@@ -56,5 +56,5 @@ Once Ansible finishes with zero failed tasks, the system is alive. Give the Java
 * **HAProxy Dashboard:** `http://localhost:8080/haproxy?stats` (Check the health of your clusters).
 * **Zipkin Tracing:** `http://192.168.56.11:9411` (Click "Run Query" and explore the "Dependencies" map to see the microservices talking to each other).
 
----
-*Architected with focus on resilience, observability, and Infrastructure as Code.*
+
+
