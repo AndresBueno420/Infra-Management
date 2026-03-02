@@ -1,6 +1,6 @@
-# Distributed Microservices Architecture: DevOps Edition
+# Distributed Microservices Architecture
 
-Welcome to the infrastructure repository for our distributed microservices application. This project demonstrates a complete end-to-end DevOps lifecycle, transforming 5 separate codebases into a cohesive, highly available system using CI/CD pipelines, Infrastructure as Code (IaC), and container orchestration.
+Welcome to the infrastructure repository for our distributed microservices application. This project demonstrates a complete end-to-end DevOps lifecycle, transforming 5 separate codebases into a cohesive, highly available system using CI pipeline since the CD must be on premise using ansible, Infrastructure as Code (IaC), and container orchestration.
 
 ## The Engineering Challenge: Hardware Constraints
 
@@ -19,13 +19,13 @@ Originally we provided the following diagram of the solution, where every servic
 This infrastructure coordinates 5 separate repositories. GitHub Actions automatically builds and pushes these to GitHub Container Registry (GHCR) upon every commit to the `main` branch.
 
 * [Infra-Management](https://github.com/andresbueno420/Infra-Management) *(You are here)*
-* [Users-API (Java/Spring Boot)](https://github.com/andresbueno420/Users-API)
-* [Auth-API (Go)](https://github.com/andresbueno420/Auth-API)
-* [TODOs-API (Node.js)](https://github.com/andresbueno420/TODOs-API)
-* [Log-Message-Processor (Python)](https://github.com/andresbueno420/Log-Message-Processor)
-* [Frontend (Vue.js)](https://github.com/andresbueno420/Frontend)
+* [Users-API (Java/Spring Boot)](https://github.com/andresbueno420/users-api)
+* [Auth-API (Go)](https://github.com/andresbueno420/auth-api)
+* [TODOs-API (Node.js)](https://github.com/andresbueno420/todos-api)
+* [Log-Message-Processor (Python)](https://github.com/andresbueno420/log-message-processor)
+* [Frontend (Vue.js)](https://github.com/andresbueno420/frontend)
 
-## Tech Stack & Best Practices Implemented
+## Tech Stack 
 
 Rather than listing technologies, here is how we used them to solve actual architectural problems:
 
