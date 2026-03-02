@@ -64,7 +64,7 @@ Here is an example of the provided dashboard:
 <img width="1328" height="527" alt="image" src="https://github.com/user-attachments/assets/f0b51e33-3ac1-4c85-98dc-6dff3d01f649" />
 
 * **Zipkin Tracing:** `http://192.168.56.11:9411` (Click "Run Query" and explore the "Dependencies" map to see the microservices talking to each other). The following image displays the given dashboard from the server:
-* 
+
 <img width="1336" height="338" alt="image" src="https://github.com/user-attachments/assets/d8ecfee0-81ee-4ad9-be31-bbb1d2a8a343" />
 
 
