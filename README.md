@@ -4,10 +4,15 @@ Welcome to the infrastructure repository for our distributed microservices appli
 
 ## The Engineering Challenge: Hardware Constraints
 
-Most tutorials assume infinite cloud resources. We engineered this solution under strict, real-world constraints: **A physical host machine with only 8GB of RAM.** Deploying 5 microservices, a message broker, a tracing server, and a load balancer using the traditional "one VM per service" approach would have instantly crashed the host OS. Instead, we designed a **High-Density 2-Node Architecture**. We split the ecosystem by resource consumption, strictly allocating 2GB of RAM to each virtual machine:
+This solution is made under strict constraints: **A physical host machine with only 8GB of RAM.** Deploying 5 microservices, a message broker, a tracing server, and a load balancer using the traditional "one VM per service" approach would have instantly crashed the host OS. Instead, we designed a **High-Density 2-Node Architecture**. We split the ecosystem by resource consumption, strictly allocating 2GB of RAM to each virtual machine:
 
 * **Node 1 (node-apps | 192.168.56.10):** The lightweight traffic gateway. It hosts HAProxy (Load Balancer), the Vue Frontend, the Go Auth API, and the Node.js TODOs API.
 * **Node 2 (node-data | 192.168.56.11):** The heavy-lifting backend. It isolates the Java Spring Boot Users API (with strict JVM memory limits applied via Ansible), the Redis Queue, the Python Log Processor, and the Zipkin Tracing Server.
+
+Originally we provided the following diagram of the solution, where every service was living inside its own vm and some of them were provided with a dedicated Database:
+
+<img width="788" height="510" alt="image" src="https://github.com/user-attachments/assets/65c4e8ae-92e7-4be3-b327-98a493528076" />
+
 
 ## The Microservices Ecosystem
 
@@ -54,7 +59,14 @@ Extract the dynamic SSH configuration to avoid key errors, then run the master p
 Once Ansible finishes with zero failed tasks, the system is alive. Give the Java container a couple of minutes to fully boot, then visit:
 * **The Application:** `http://localhost:8080` (Create an account, log in, and add some TODOs!).
 * **HAProxy Dashboard:** `http://localhost:8080/haproxy?stats` (Check the health of your clusters).
-* **Zipkin Tracing:** `http://192.168.56.11:9411` (Click "Run Query" and explore the "Dependencies" map to see the microservices talking to each other).
+Here is an example of the provided dashboard:
+
+<img width="1328" height="527" alt="image" src="https://github.com/user-attachments/assets/f0b51e33-3ac1-4c85-98dc-6dff3d01f649" />
+
+* **Zipkin Tracing:** `http://192.168.56.11:9411` (Click "Run Query" and explore the "Dependencies" map to see the microservices talking to each other). The following image displays the given dashboard from the server:
+* 
+<img width="1336" height="338" alt="image" src="https://github.com/user-attachments/assets/d8ecfee0-81ee-4ad9-be31-bbb1d2a8a343" />
+
 
 
 
