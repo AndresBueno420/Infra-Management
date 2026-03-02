@@ -2,6 +2,9 @@ global
     log /dev/log local0
     log /dev/log local1 notice
     maxconn 2000
+    user haproxy
+    group haproxy
+    daemon
 
 defaults
     log     global
@@ -14,39 +17,31 @@ defaults
 
 frontend http_front
     bind *:80
+    stats enable
     stats uri /haproxy?stats
 
-    # Reglas de inspección de tráfico
     acl is_auth_api path_beg /api/auth
     acl is_users_api path_beg /api/users
     acl is_todos_api path_beg /api/todos
     
-    # Intercepción dura: HAProxy manda el tráfico directo a las APIs
     use_backend auth_api_cluster if is_auth_api
     use_backend users_api_cluster if is_users_api
     use_backend todos_api_cluster if is_todos_api
     
-    # Si no dice /api, es la interfaz gráfica
     default_backend frontend_cluster
-
-# --- Destinos re-mapeados a los 2 Nodos ---
 
 backend frontend_cluster
     balance roundrobin
-    # Vive en esta misma VM (node-apps)
     server frontend_vm 192.168.56.10:8080 check
 
 backend auth_api_cluster
     balance roundrobin
-    # Vive en esta misma VM (node-apps)
     server auth_vm 192.168.56.10:8000 check
 
 backend todos_api_cluster
     balance roundrobin
-    # Vive en esta misma VM (node-apps)
     server todos_vm 192.168.56.10:8082 check
 
 backend users_api_cluster
     balance roundrobin
-    # Vive en el nodo remoto (node-data)
     server users_vm 192.168.56.11:8083 check
