@@ -5,9 +5,6 @@
   roles:
     - common
 
-# ==========================================
-# FASE 1: NODO 2 (DATOS Y BACKEND PESADO)
-# ==========================================
 - name: Desplegar Persistencia y Lógica Pesada
   hosts: node_data
   become: true
@@ -33,27 +30,24 @@
         name: app_deploy
       vars:
         app_name: "users-api"
-        app_image: "ghcr.io/tu-usuario/users-api:latest"
+        app_image: "ghcr.io/andresbueno420/users-api:latest"
         app_port_mapping: "8083:8083"
         app_env_vars:
           JAVA_TOOL_OPTIONS: "-Xms256m -Xmx512m"
-          ZIPKIN_URL: "http://192.168.56.11:9411/api/v1/spans"
+          ZIPKIN_URL: "http://192.168.56.11:9411/api/v2/spans"
 
     - name: Levantar Log Processor
       include_role:
         name: app_deploy
       vars:
         app_name: "log-processor"
-        app_image: "ghcr.io/tu-usuario/log-message-processor:latest"
+        app_image: "ghcr.io/andresbueno420/log-message-processor:latest"
         app_port_mapping: "" 
         app_env_vars:
           REDIS_HOST: "192.168.56.11"
           REDIS_PORT: "6379"
-          ZIPKIN_URL: "http://192.168.56.11:9411/api/v1/spans"
+          ZIPKIN_URL: "http://192.168.56.11:9411/api/v2/spans"
 
-# ==========================================
-# FASE 2: NODO 1 (PROXY Y APIS LIGERAS)
-# ==========================================
 - name: Configurar Gateway y Front
   hosts: node_apps
   become: true
@@ -67,33 +61,34 @@
         name: app_deploy
       vars:
         app_name: "auth-api"
-        app_image: "ghcr.io/tu-usuario/auth-api:latest"
+        app_image: "ghcr.io/andresbueno420/auth-api:latest"
         app_port_mapping: "8000:8000"
         app_env_vars:
-          # Auth necesita consultar a Users (que está en el otro nodo)
+          AUTH_API_PORT: "8000" 
+          JWT_SECRET: "PRFT"
           USERS_API_ADDRESS: "http://192.168.56.11:8083"
-          ZIPKIN_URL: "http://192.168.56.11:9411/api/v1/spans"
+          ZIPKIN_URL: "http://192.168.56.11:9411/api/v2/spans"
 
     - name: Levantar TODOs API
       include_role:
         name: app_deploy
       vars:
         app_name: "todos-api"
-        app_image: "ghcr.io/tu-usuario/todos-api:latest"
+        app_image: "ghcr.io/andresbueno420/todos-api:latest"
         app_port_mapping: "8082:8082"
         app_env_vars:
           REDIS_HOST: "192.168.56.11"
           REDIS_PORT: "6379"
-          ZIPKIN_URL: "http://192.168.56.11:9411/api/v1/spans"
+          ZIPKIN_URL: "http://192.168.56.11:9411/api/v2/spans"
 
     - name: Levantar Frontend Vue
       include_role:
         name: app_deploy
       vars:
         app_name: "frontend-app"
-        app_image: "ghcr.io/tu-usuario/frontend:latest"
+        app_image: "ghcr.io/andresbueno420/frontend:latest"
         app_port_mapping: "8080:8080"
         app_env_vars:
           AUTH_API_ADDRESS: "http://192.168.56.10:8000"
           TODOS_API_ADDRESS: "http://192.168.56.10:8082"
-          ZIPKIN_URL: "http://192.168.56.11:9411/api/v1/spans"
+          ZIPKIN_URL: "http://192.168.56.11:9411/api/v2/spans"
